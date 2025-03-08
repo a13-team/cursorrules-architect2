@@ -15,7 +15,11 @@ DEFAULT_EXCLUDE_DIRS = {
     'vendor', 'tmp', 'temp', '.temp', '.idea', '.vscode',
     'venv', '.venv', 'env', '.env', '.tox', 'eggs',
     '.mypy_cache', '.ruff_cache', '.pytest_cache',
-    'htmlcov', '.coverage', '.hypothesis', '.git'
+    'htmlcov', '.coverage', '.hypothesis', '.git',
+    'bootstrap/cache',  # Laravel cache
+    'storage/framework',  # Laravel framework storage
+    'storage/logs',      # Laravel logs
+    'storage/app',       # Laravel app storage
 }
 
 DEFAULT_EXCLUDE_PATTERNS = {
@@ -30,7 +34,17 @@ DEFAULT_EXCLUDE_PATTERNS = {
     'LICENSE', 'LICENSE.*',  # License files
     '.cursorrules',  # Cursor rules output
     '.gitignore',  # Git ignore
-    '.dockerignore'  # Docker ignore
+    '.dockerignore',  # Docker ignore
+    '*.cache',          # Cache files
+    '*.hot-update.js',  # Webpack hot updates
+    '*.hot-update.json', # Webpack hot updates
+    '*.phpunit.result.cache', # PHPUnit cache
+    'mix-manifest.json',  # Laravel Mix manifest
+    'yarn-error.log',    # Yarn errors
+    'npm-debug.log',     # NPM debug
+    '.phpstorm.meta.php', # PHPStorm meta
+    '_ide_helper.php',    # IDE helper
+    '.php_cs.cache',     # PHP CS Fixer cache
 }
 
 # File type emojis
@@ -42,6 +56,10 @@ FILE_ICONS: Dict[str, str] = {
     '.ts': '💠',    # TypeScript
     '.tsx': '⚛️',    # React TypeScript
     '.html': '🌐',   # HTML
+    '.php': '🐘',    # PHP
+    '.blade.php': '🔪',    # Blade PHP
+    '.test.php': '🧪',    # PHP Test files
+    '.spec.php': '🧪',    # PHP Spec files
     '.css': '🎨',    # CSS
     '.scss': '🎨',   # SCSS
     '.sass': '🎨',   # SASS
@@ -52,15 +70,23 @@ FILE_ICONS: Dict[str, str] = {
     '.yml': '📋',    # YML
     '.md': '📝',     # Markdown
     '.txt': '📄',    # Text
-    '.sh': '💻',     # Shell
-    '.bash': '💻',   # Bash
-    '.zsh': '💻',    # Zsh
+    '.sh': '🐚',     # Shell
+    '.bash': '🐚',   # Bash
+    '.zsh': '🐚',    # Zsh
     '.env': '🔒',    # Environment
     'Dockerfile': '🐳',    # Dockerfile
     'docker-compose.yml': '🐳',  # Docker compose
     'package.json': '📦',  # Package JSON
     'requirements.txt': '📦',  # Python requirements
-    'README': '📖',        # README
+    'README': '��',        # README
+    'artisan': '⚡',      # Laravel Artisan
+    'composer.json': '📦',  # Composer
+    'composer.lock': '📦',  # Composer lock
+    '.env.example': '🔒',   # Environment example
+    'phpunit.xml': '🧪',    # PHPUnit config
+    'webpack.mix.js': '🔄',  # Laravel Mix
+    'vite.config.js': '⚡',  # Vite config
+    'tailwind.config.js': '🎨', # Tailwind config
 }
 
 # File type descriptions for the key
@@ -71,15 +97,20 @@ ICON_DESCRIPTIONS = {
     '⚛️': 'React',
     '💠': 'TypeScript',
     '🌐': 'HTML',
+    '🐘': 'PHP',
+    '🔪': 'Blade PHP',
+    '🧪': 'Test file',
     '🎨': 'CSS/SCSS/SASS',
     '📋': 'Data file (JSON/YAML/XML)',
     '📝': 'Markdown',
     '📄': 'Text file',
-    '💻': 'Shell script',
+    '🐚': 'Shell script',
     '🔒': 'Environment file',
     '📦': 'Package file',
     '📖': 'README',
     '🐳': 'Docker file',
+    '⚡': 'Build/Config file',
+    '🔄': 'Build process',
     '️': 'Error/Warning'
 }
 

@@ -23,40 +23,103 @@ def should_exclude(path: Path, exclude_dirs: set[str]) -> bool:
         
     # File extensions to exclude
     excluded_extensions = {
+        # Media and Assets
         '.svg', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.webp',  # Images
-        '.lock', '.log',  # Lock and log files
-        '.map', '.min.js', '.min.css',  # Generated/minified files
         '.woff', '.woff2', '.ttf', '.eot',  # Fonts
         '.mp4', '.webm', '.ogg', '.mp3', '.wav',  # Media files
+        
+        # Development files
+        '.lock', '.log',  # Lock and log files
+        '.map', '.min.js', '.min.css',  # Generated/minified files
         '.pdf', '.doc', '.docx', '.xls', '.xlsx',  # Documents
         '.pyc', '.pyo', '.pyd',  # Python compiled files
+        
+        # Laravel specific
+        '.sqlite', '.sqlite-journal',  # SQLite databases
+        '.phpunit.result.cache',  # PHPUnit cache
+        '.php-cs-fixer.cache',    # PHP CS Fixer cache
+        '.php_cs.cache',          # PHP CS cache
     }
     
     # Specific files to exclude
     excluded_files = {
-        'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml',  # Package locks
-        '.gitignore', '.gitattributes', '.gitmodules',  # Git files
-        'LICENSE', 'LICENSE.md', 'LICENSE.txt',  # License files
-        'CHANGELOG.md', 'CONTRIBUTING.md',  # Project docs
-        '__init__.py',  # Empty Python init files
-        'requirements.txt', 'Pipfile.lock',  # Python dependency files
-        'poetry.lock', 'Cargo.lock',  # More lock files
-        '.npmrc', '.yarnrc', '.npmignore',  # Package manager configs
-        'tsconfig.tsbuildinfo',  # TypeScript build info
-        'CNAME', 'robots.txt', 'sitemap.xml',  # Web files
-        'Thumbs.db', '.DS_Store', 'desktop.ini',  # System files
-        'LICENSE-MIT', 'LICENSE-APACHE',  # More license variants
-        'NOTICE', 'PATENTS', 'AUTHORS',  # Legal files
-        'yarn-error.log', 'npm-debug.log',  # Error logs
-        '.eslintignore', '.prettierignore',  # Tool ignore files
-        'babel.config.js', 'jest.config.js',  # Tool configs
-        '.editorconfig',  # Editor configs
+        # Package management
+        'package-lock.json', 'yarn.lock', 'pnpm-lock.yaml',
+        'composer.lock',
+        
+        # Git files
+        '.gitignore', '.gitattributes', '.gitmodules',
+        
+        # Documentation
+        'LICENSE', 'LICENSE.md', 'LICENSE.txt',
+        'CHANGELOG.md', 'CONTRIBUTING.md',
+        
+        # Python files
+        '__init__.py',
+        'requirements.txt', 'Pipfile.lock',
+        'poetry.lock', 'Cargo.lock',
+        
+        # Package configs
+        '.npmrc', '.yarnrc', '.npmignore',
+        'tsconfig.tsbuildinfo',
+        
+        # Web files
+        'CNAME', 'robots.txt', 'sitemap.xml',
+        
+        # System files
+        'Thumbs.db', '.DS_Store', 'desktop.ini',
+        
+        # Legal files
+        'LICENSE-MIT', 'LICENSE-APACHE',
+        'NOTICE', 'PATENTS', 'AUTHORS',
+        
+        # Error logs
+        'yarn-error.log', 'npm-debug.log',
+        
+        # Tool configs
+        '.eslintignore', '.prettierignore',
+        'babel.config.js', 'jest.config.js',
+        
+        # Laravel specific
+        '.phpstorm.meta.php',      # PHPStorm metadata
+        '_ide_helper.php',         # IDE Helper
+        '_ide_helper_models.php',  # IDE Helper for models
+        'mix-manifest.json',       # Laravel Mix manifest
+        'hot',                     # Laravel Mix hot module
+        'auth.json',              # Composer authentication
+        '.env.backup',            # Environment backups
+        '.env.*.local',           # Local environment files
+        'phpunit.xml.bak',        # PHPUnit backup
+        '*.hot-update.js',        # Webpack hot updates
+        '*.hot-update.json',      # Webpack hot updates
+        'webpack.mix.js.map',     # Source maps
+        '.php_cs',               # PHP CS Fixer config
+        '.php_cs.dist',          # PHP CS Fixer dist config
+        '.phpunit.result.cache', # PHPUnit cache
     }
     
     # Files to always include even if they start with .
     important_files = {
-        '.env', '.env.test', '.env.local', '.env.development',
-        '.env.production', '.env.example'
+        # Environment files
+        '.env',
+        '.env.example',
+        '.env.testing',
+        '.env.dusk.local',
+        
+        # Configuration files
+        '.htaccess',
+        '.gitignore',
+        '.editorconfig',
+        '.styleci.yml',
+        
+        # Laravel specific configs
+        'artisan',
+        'composer.json',
+        'package.json',
+        'phpunit.xml',
+        'webpack.mix.js',
+        'vite.config.js',
+        'tailwind.config.js',
     }
     
     if path.name in important_files:
@@ -70,13 +133,45 @@ def generate_tree(directory: Path, tree: Tree, exclude_dirs: set[str] = None) ->
     """Recursively generate a directory tree."""
     if exclude_dirs is None:
         exclude_dirs = {
+            # Standard excludes
             'node_modules', '__pycache__', '.next', 'build', 'dist',
             'coverage', '.pytest_cache', '.sass-cache', '.turbo',
             'out', '.output', '.nuxt', '.cache', '.parcel-cache',
             'vendor', 'tmp', 'temp', '.temp', '.idea', '.vscode',
             'venv', '.venv', 'env', '.env', '.tox', 'eggs',
             '.mypy_cache', '.ruff_cache', '.pytest_cache',
-            'htmlcov', '.coverage', '.hypothesis'
+            'htmlcov', '.coverage', '.hypothesis',
+            
+            # Laravel specific directories
+            'storage/app',           # Storage directory
+            'storage/framework',     # Framework storage
+            'storage/logs',          # Log storage
+            'storage/debugbar',      # Debugbar storage
+            'bootstrap/cache',       # Bootstrap cache
+            'public/storage',        # Public storage link
+            'public/hot',           # Hot reload directory
+            'public/css',           # Compiled CSS
+            'public/js',            # Compiled JavaScript
+            'public/mix',           # Mix compiled assets
+            'public/build',         # Vite/Mix build output
+            '.phpunit.cache',       # PHPUnit cache directory
+            '.php-cs-fixer.cache',  # PHP CS Fixer cache
+            'coverage',             # Code coverage reports
+            'coverage-html',        # HTML coverage reports
+            '.vapor',              # Laravel Vapor artifacts
+            '.serverless',         # Serverless artifacts
+            
+            # Framework storage subdirectories
+            'storage/framework/cache',      # Framework cache
+            'storage/framework/sessions',   # Session files
+            'storage/framework/views',      # Compiled views
+            'storage/framework/testing',    # Testing artifacts
+            
+            # Additional Laravel specific
+            'storage/framework/cache/data',  # Cache data
+            'storage/app/public',           # Public storage
+            'storage/app/private',          # Private storage
+            'public/vendor',                # Public vendor assets
         }
     
     try:

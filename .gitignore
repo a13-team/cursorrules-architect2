@@ -30,3 +30,4 @@ wheels/
 # Project specific
 project_tree_*
 our-notes/
+venv

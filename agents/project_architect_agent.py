@@ -28,29 +28,150 @@ class ProjectArchitectAgent:
         # Define known file patterns and their analyzers
         self.file_patterns = {
             'dependencies': {
-                'patterns': ['package.json', 'requirements.txt', 'Pipfile', 'poetry.lock'],
+                'patterns': [
+                    # PHP/Laravel Dependencies
+                    'composer.json',
+                    'composer.lock',
+                    'package.json',
+                    'package-lock.json',
+                    'yarn.lock',
+                    'auth.json',
+                ],
                 'agent': 'dependency_analyzer_agent',
                 'priority': 1
             },
             'tests': {
-                'patterns': ['test_*.py', '*_test.py', '*.spec.ts', '*.test.js'],
+                'patterns': [
+                    # Laravel Tests
+                    'tests/Feature/*.php',
+                    'tests/Unit/*.php',
+                    'tests/Browser/*.php',  # Laravel Dusk
+                    'tests/Integration/*.php',
+                    '*Test.php',
+                    '*Spec.php',
+                    'phpunit.xml',
+                    '.env.testing',
+                    'tests/CreatesApplication.php',
+                    'tests/TestCase.php',
+                ],
                 'agent': 'test_analyzer_agent',
                 'priority': 2
             },
             'documentation': {
-                'patterns': ['*.md', 'docs/*', 'README*', 'CONTRIBUTING*'],
+                'patterns': [
+                    '*.md',
+                    'docs/*',
+                    'README*',
+                    'CONTRIBUTING*',
+                    'resources/docs/*',
+                    'resources/views/docs/*',
+                    'phpDocumentor.xml',
+                ],
                 'agent': 'documentation_analyzer_agent',
                 'priority': 2
             },
             'configuration': {
-                'patterns': ['.env*', '*.config.js', '*.yaml', '*.yml', 'pyproject.toml'],
+                'patterns': [
+                    # Laravel Config Files
+                    'config/*.php',
+                    '.env*',
+                    'phpunit.xml',
+                    'artisan',
+                    'webpack.mix.js',
+                    'vite.config.js',
+                    'tailwind.config.js',
+                    'postcss.config.js',
+                    '.htaccess',
+                    'server.php',
+                    'routes/*.php',
+                    'bootstrap/app.php',
+                    'bootstrap/cache/*.php',
+                    '.styleci.yml',
+                    '.php-cs-fixer.php',
+                    '.php_cs',
+                    '.php_cs.dist',
+                    'docker-compose.yml',
+                    'Dockerfile',
+                    'nginx.conf',
+                ],
                 'agent': 'config_analyzer_agent',
-                'priority': 3
+                'priority': 1
             },
             'source_code': {
-                'patterns': ['*.py', '*.js', '*.ts', '*.tsx', '*.jsx'],
+                'patterns': [
+                    # Laravel Source Code
+                    'app/*.php',
+                    'app/**/*.php',
+                    'database/migrations/*.php',
+                    'database/seeders/*.php',
+                    'database/factories/*.php',
+                    'resources/views/**/*.blade.php',
+                    'resources/js/**/*.js',
+                    'resources/js/**/*.ts',
+                    'resources/js/**/*.vue',
+                    'resources/css/**/*.css',
+                    'resources/sass/**/*.scss',
+                    'routes/*.php',
+                    'app/Http/Controllers/*.php',
+                    'app/Http/Middleware/*.php',
+                    'app/Models/*.php',
+                    'app/Providers/*.php',
+                    'app/Services/*.php',
+                    'app/Repositories/*.php',
+                    'app/Console/Commands/*.php',
+                    'app/Jobs/*.php',
+                    'app/Events/*.php',
+                    'app/Listeners/*.php',
+                    'app/Notifications/*.php',
+                    'app/Policies/*.php',
+                    'app/Rules/*.php',
+                ],
                 'agent': 'code_analyzer_agent',
                 'priority': 1
+            },
+            'security': {
+                'patterns': [
+                    # Security-sensitive files
+                    '.env*',
+                    'config/auth.php',
+                    'config/security.php',
+                    'config/cors.php',
+                    'config/sanctum.php',
+                    'config/session.php',
+                    'app/Http/Middleware/Authenticate.php',
+                    'app/Http/Middleware/VerifyCsrfToken.php',
+                    'routes/api.php',
+                    'config/database.php',
+                ],
+                'agent': 'security_analyzer_agent',
+                'priority': 1
+            },
+            'database': {
+                'patterns': [
+                    # Database related files
+                    'database/migrations/*.php',
+                    'database/seeders/*.php',
+                    'database/factories/*.php',
+                    'config/database.php',
+                    'storage/database.sqlite',
+                ],
+                'agent': 'database_analyzer_agent',
+                'priority': 2
+            },
+            'assets': {
+                'patterns': [
+                    # Asset files
+                    'public/js/*.js',
+                    'public/css/*.css',
+                    'public/images/*',
+                    'public/fonts/*',
+                    'resources/js/**/*',
+                    'resources/css/**/*',
+                    'resources/sass/**/*',
+                    'resources/assets/**/*',
+                ],
+                'agent': 'asset_analyzer_agent',
+                'priority': 3
             }
         }
 

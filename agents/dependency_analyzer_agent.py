@@ -14,7 +14,7 @@ class ClaudeAnalyzer:
 
     def find_dependency_files(self, path: Union[str, Path]) -> Dict[str, Path]:
         """
-        Find package.json and/or requirements.txt in the given path.
+        Find dependency files in the given path.
         
         Args:
             path: Directory path to search in
@@ -25,15 +25,32 @@ class ClaudeAnalyzer:
         path = Path(path)
         dependency_files = {}
         
-        # Check for package.json
-        package_json = path / 'package.json'
-        if package_json.exists():
-            dependency_files['package.json'] = package_json
-            
-        # Check for requirements.txt
-        requirements_txt = path / 'requirements.txt'
-        if requirements_txt.exists():
-            dependency_files['requirements.txt'] = requirements_txt
+        # Laravel/PHP Dependencies
+        composer_files = {
+            'composer.json': path / 'composer.json',
+            'composer.lock': path / 'composer.lock',
+            'auth.json': path / 'auth.json',
+        }
+        
+        # Frontend Dependencies
+        frontend_files = {
+            'package.json': path / 'package.json',
+            'package-lock.json': path / 'package-lock.json',
+            'yarn.lock': path / 'yarn.lock',
+        }
+        
+        # Build/Asset Dependencies
+        build_files = {
+            'webpack.mix.js': path / 'webpack.mix.js',
+            'vite.config.js': path / 'vite.config.js',
+            'tailwind.config.js': path / 'tailwind.config.js',
+            'postcss.config.js': path / 'postcss.config.js',
+        }
+        
+        # Check and add existing files
+        for file_type, file_path in {**composer_files, **frontend_files, **build_files}.items():
+            if file_path.exists():
+                dependency_files[file_type] = file_path
             
         return dependency_files
 
@@ -54,7 +71,7 @@ class ClaudeAnalyzer:
             
         dependency_files = self.find_dependency_files(path)
         if not dependency_files:
-            self.console.print(f"[bold yellow]No dependency files (package.json/requirements.txt) found in {path}[/bold yellow]")
+            self.console.print(f"[bold yellow]No dependency files (composer.json/package.json/requirements.txt) found in {path}[/bold yellow]")
             return {}
             
         analysis_results = {}
@@ -71,51 +88,107 @@ class ClaudeAnalyzer:
         return analysis_results
 
     def analyze_dependencies(self, file_path: str) -> dict:
-        """Analyze package.json or requirements.txt with Claude-3-5-sonnet-20241022 and return the analysis."""
+        """Analyze dependency files with Claude and return the analysis."""
         try:
-            # Read the file
             with open(file_path, 'r') as f:
                 file_content = f.read()
 
-            file_type = Path(file_path).suffix
-            if file_type == '.json':
-                system = """You are a dependency version analyzer. Output ONLY in this exact JSON format:
+            file_name = Path(file_path).name
+            
+            # Define analysis systems based on file type
+            if file_name == 'composer.json':
+                system = """You are a PHP/Laravel dependency analyzer. Output ONLY in this exact JSON format:
 {
-    "package_versions": [
+    "php_dependencies": [
         {
             "name": "package-name",
-            "current_version": "version-specified",
+            "current_version": "version-constraint",
             "latest_version": "latest-available",
+            "type": "require/require-dev",
             "is_latest": boolean,
-            "version_gap": "semantic version difference"
+            "is_security_risk": boolean,
+            "description": "brief package description"
         }
     ],
     "metadata": {
         "total_packages": number,
         "outdated_count": number,
+        "security_issues": number,
+        "php_version": "version-constraint",
+        "laravel_version": "version-constraint",
         "analysis_date": "YYYY-MM-DD"
     }
 }"""
-                prompt = f"Extract and analyze version information from this package.json:\n\n{file_content}"
-            else:  # requirements.txt
-                system = """You are a Python dependency version analyzer. Output ONLY in this exact JSON format:
+                prompt = f"Analyze PHP/Laravel dependencies from this composer.json:\n\n{file_content}"
+                
+            elif file_name == 'package.json':
+                system = """You are a frontend dependency analyzer for Laravel projects. Output ONLY in this exact JSON format:
 {
-    "python_versions": [
+    "dependencies": [
         {
             "name": "package-name",
-            "specified_version": "version-constraint",
+            "current_version": "version-specified",
             "latest_version": "latest-available",
-            "is_compatible": boolean,
-            "min_python_version": "minimum-python-version"
+            "type": "dependency/devDependency",
+            "is_latest": boolean,
+            "is_security_risk": boolean,
+            "category": "framework/ui/build/test"
         }
     ],
     "metadata": {
         "total_packages": number,
-        "packages_with_constraints": number,
+        "outdated_count": number,
+        "security_issues": number,
+        "node_version": "version-specified",
         "analysis_date": "YYYY-MM-DD"
     }
 }"""
-                prompt = f"Extract and analyze version information from this requirements.txt:\n\n{file_content}"
+                prompt = f"Analyze frontend dependencies from this package.json:\n\n{file_content}"
+                
+            elif file_name in ['webpack.mix.js', 'vite.config.js']:
+                system = """You are a Laravel build configuration analyzer. Output ONLY in this exact JSON format:
+{
+    "build_config": {
+        "tool": "webpack/vite",
+        "entry_points": ["list-of-entry-points"],
+        "output_paths": ["list-of-output-paths"],
+        "plugins": [
+            {
+                "name": "plugin-name",
+                "purpose": "brief-description"
+            }
+        ]
+    },
+    "metadata": {
+        "total_plugins": number,
+        "uses_typescript": boolean,
+        "uses_sass": boolean,
+        "uses_postcss": boolean,
+        "analysis_date": "YYYY-MM-DD"
+    }
+}"""
+                prompt = f"Analyze build configuration from {file_name}:\n\n{file_content}"
+                
+            else:
+                system = """You are a dependency file analyzer. Output ONLY in this exact JSON format:
+{
+    "file_analysis": {
+        "file_type": "file-type",
+        "purpose": "file-purpose",
+        "dependencies": [
+            {
+                "name": "dependency-name",
+                "version": "version-info",
+                "type": "dependency-type"
+            }
+        ]
+    },
+    "metadata": {
+        "total_entries": number,
+        "analysis_date": "YYYY-MM-DD"
+    }
+}"""
+                prompt = f"Analyze dependency information from {file_name}:\n\n{file_content}"
 
             self.console.print(f"\n[bold blue]Starting analysis with Claude-3-5-sonnet-20241022 for {Path(file_path).name}...[/bold blue]")
             
@@ -187,35 +260,65 @@ class ClaudeAnalyzer:
         if "raw_analysis" in analysis:
             return f"\n\n## Dependency Analysis\n\n{analysis['raw_analysis']}"
 
-        md = "\n\n## Dependency Version Analysis\n\n"
+        md = "\n\n## Dependency Analysis\n\n"
         
-        if file_type == '.json':  # package.json format
-            md += f"Analysis Date: {analysis['metadata']['analysis_date']}\n\n"
-            md += f"Total Packages: {analysis['metadata']['total_packages']}\n"
-            md += f"Outdated Packages: {analysis['metadata']['outdated_count']}\n\n"
+        if "php_dependencies" in analysis:  # composer.json
+            md += f"### PHP/Laravel Dependencies\n"
+            md += f"Analysis Date: {analysis['metadata']['analysis_date']}\n"
+            md += f"PHP Version: `{analysis['metadata']['php_version']}`\n"
+            md += f"Laravel Version: `{analysis['metadata']['laravel_version']}`\n\n"
             
-            md += "### Package Versions\n"
-            for pkg in analysis['package_versions']:
-                status = "✅" if pkg['is_latest'] else "⚠️"
-                md += f"{status} **{pkg['name']}**\n"
+            md += f"Total Packages: {analysis['metadata']['total_packages']}\n"
+            md += f"Outdated Packages: {analysis['metadata']['outdated_count']}\n"
+            md += f"Security Issues: {analysis['metadata']['security_issues']}\n\n"
+            
+            for pkg in analysis['php_dependencies']:
+                status = "🔴" if pkg['is_security_risk'] else "✅" if pkg['is_latest'] else "⚠️"
+                md += f"{status} **{pkg['name']}** ({pkg['type']})\n"
                 md += f"  - Current: `{pkg['current_version']}`\n"
                 md += f"  - Latest: `{pkg['latest_version']}`\n"
-                if not pkg['is_latest']:
-                    md += f"  - Version Gap: {pkg['version_gap']}\n"
-                md += "\n"
+                md += f"  - {pkg['description']}\n\n"
+                
+        elif "dependencies" in analysis:  # package.json
+            md += f"### Frontend Dependencies\n"
+            md += f"Analysis Date: {analysis['metadata']['analysis_date']}\n"
+            md += f"Node Version: `{analysis['metadata']['node_version']}`\n\n"
             
-        else:  # requirements.txt format
-            md += f"Analysis Date: {analysis['metadata']['analysis_date']}\n\n"
             md += f"Total Packages: {analysis['metadata']['total_packages']}\n"
-            md += f"Packages with Version Constraints: {analysis['metadata']['packages_with_constraints']}\n\n"
+            md += f"Outdated Packages: {analysis['metadata']['outdated_count']}\n"
+            md += f"Security Issues: {analysis['metadata']['security_issues']}\n\n"
             
-            md += "### Python Package Versions\n"
-            for pkg in analysis['python_versions']:
-                status = "✅" if pkg['is_compatible'] else "⚠️"
-                md += f"{status} **{pkg['name']}**\n"
-                md += f"  - Specified: `{pkg['specified_version']}`\n"
-                md += f"  - Latest: `{pkg['latest_version']}`\n"
-                md += f"  - Min Python: `{pkg['min_python_version']}`\n\n"
+            # Group by category
+            categories = {}
+            for pkg in analysis['dependencies']:
+                if pkg['category'] not in categories:
+                    categories[pkg['category']] = []
+                categories[pkg['category']].append(pkg)
+            
+            for category, packages in categories.items():
+                md += f"#### {category.title()}\n"
+                for pkg in packages:
+                    status = "🔴" if pkg['is_security_risk'] else "✅" if pkg['is_latest'] else "⚠️"
+                    md += f"{status} **{pkg['name']}** ({pkg['type']})\n"
+                    md += f"  - Current: `{pkg['current_version']}`\n"
+                    md += f"  - Latest: `{pkg['latest_version']}`\n\n"
+                    
+        elif "build_config" in analysis:  # webpack.mix.js/vite.config.js
+            md += f"### Build Configuration\n"
+            md += f"Tool: {analysis['build_config']['tool']}\n\n"
+            
+            md += "#### Entry Points\n"
+            for entry in analysis['build_config']['entry_points']:
+                md += f"- {entry}\n"
+            
+            md += "\n#### Plugins\n"
+            for plugin in analysis['build_config']['plugins']:
+                md += f"- **{plugin['name']}**: {plugin['purpose']}\n"
+            
+            md += f"\n#### Features\n"
+            md += f"- TypeScript: {'✅' if analysis['metadata']['uses_typescript'] else '❌'}\n"
+            md += f"- Sass: {'✅' if analysis['metadata']['uses_sass'] else '❌'}\n"
+            md += f"- PostCSS: {'✅' if analysis['metadata']['uses_postcss'] else '❌'}\n"
         
         return md
 

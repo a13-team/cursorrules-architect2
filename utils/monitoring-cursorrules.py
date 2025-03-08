@@ -30,6 +30,12 @@ def should_exclude(path: Path, exclude_dirs: set[str]) -> bool:
         '.mp4', '.webm', '.ogg', '.mp3', '.wav',  # Media files
         '.pdf', '.doc', '.docx', '.xls', '.xlsx',  # Documents
         '.pyc', '.pyo', '.pyd',  # Python compiled files
+        '.cache',          # Cache files
+        '.sqlite',        # SQLite databases
+        '.sqlite-journal', # SQLite journal files
+        '.sqlite-wal',    # SQLite WAL files
+        '.sqlite-shm',    # SQLite shared memory files
+        '.phpunit.result.cache',  # PHPUnit cache
     }
     
     # Specific files to exclude
@@ -51,13 +57,62 @@ def should_exclude(path: Path, exclude_dirs: set[str]) -> bool:
         '.eslintignore', '.prettierignore',  # Tool ignore files
         'babel.config.js', 'jest.config.js',  # Tool configs
         '.editorconfig',  # Editor configs
+        # Laravel specific files
+        '.php_cs.cache',           # PHP CS Fixer cache
+        '.php-cs-fixer.cache',     # PHP CS Fixer cache
+        '.phpstorm.meta.php',      # PHPStorm metadata
+        '_ide_helper.php',         # IDE Helper
+        '_ide_helper_models.php',  # IDE Helper for models
+        '.phpunit.result.cache',   # PHPUnit cache
+        'mix-manifest.json',       # Laravel Mix manifest
+        'hot',                     # Laravel Mix hot reload
+        'auth.json',              # Composer authentication
+        '.env.backup',            # Environment backups
+        '.env.*.local',           # Local environment files
+        'phpunit.xml.bak',       # PHPUnit backup
+        'composer.lock',         # Composer lock file
+        '*.hot-update.js',      # Webpack hot updates
+        '*.hot-update.json',    # Webpack hot updates
+        '*.map',               # Source maps
     }
     
     # Files to always include even if they start with .
     important_files = {
-        '.env', '.env.test', '.env.local', '.env.development',
-        '.env.production', '.env.example'
+        '.env',
+        '.env.example',
+        '.env.testing',
+        '.env.dusk.local',
+        '.gitignore',
+        '.editorconfig',
+        '.styleci.yml',
     }
+
+    # Update the exclude_dirs set with Laravel-specific directories
+    exclude_dirs.update({
+        'storage/app',           # Storage directory
+        'storage/framework',     # Framework storage
+        'storage/logs',          # Log storage
+        'storage/debugbar',      # Debugbar storage
+        'bootstrap/cache',       # Bootstrap cache
+        'public/storage',        # Public storage link
+        'public/hot',           # Hot reload directory
+        'public/css',           # Compiled CSS
+        'public/js',            # Compiled JavaScript
+        'public/mix',           # Mix compiled assets
+        'public/build',         # Vite/Mix build output
+        'node_modules',         # Node modules
+        'vendor',               # Composer vendor
+        '.phpunit.cache',       # PHPUnit cache directory
+        '.php-cs-fixer.cache',  # PHP CS Fixer cache
+        'coverage',             # Code coverage reports
+        'coverage-html',        # HTML coverage reports
+        '.vapor',              # Laravel Vapor artifacts
+        '.serverless',         # Serverless artifacts
+        'storage/framework/cache',      # Framework cache
+        'storage/framework/sessions',   # Session files
+        'storage/framework/views',      # Compiled views
+        'storage/framework/testing',    # Testing artifacts
+    })
     
     if path.name in important_files:
         return False
@@ -76,7 +131,30 @@ def generate_tree(directory: Path, tree: Tree, exclude_dirs: set[str] = None) ->
             'vendor', 'tmp', 'temp', '.temp', '.idea', '.vscode',
             'venv', '.venv', 'env', '.env', '.tox', 'eggs',
             '.mypy_cache', '.ruff_cache', '.pytest_cache',
-            'htmlcov', '.coverage', '.hypothesis'
+            'htmlcov', '.coverage', '.hypothesis',
+            'storage/app',
+            'storage/framework',
+            'storage/logs',
+            'storage/debugbar',
+            'bootstrap/cache',
+            'public/storage',
+            'public/hot',
+            'public/css',
+            'public/js',
+            'public/mix',
+            'public/build',
+            'node_modules',
+            'vendor',
+            '.phpunit.cache',
+            '.php-cs-fixer.cache',
+            'coverage',
+            'coverage-html',
+            '.vapor',
+            '.serverless',
+            'storage/framework/cache',
+            'storage/framework/sessions',
+            'storage/framework/views',
+            'storage/framework/testing',
         }
     
     try:
@@ -216,7 +294,30 @@ def main(
         'vendor', 'tmp', 'temp', '.temp', '.idea', '.vscode',
         'venv', '.venv', 'env', '.env', '.tox', 'eggs',
         '.mypy_cache', '.ruff_cache', '.pytest_cache',
-        'htmlcov', '.coverage', '.hypothesis'
+        'htmlcov', '.coverage', '.hypothesis',
+        'storage/app',
+        'storage/framework',
+        'storage/logs',
+        'storage/debugbar',
+        'bootstrap/cache',
+        'public/storage',
+        'public/hot',
+        'public/css',
+        'public/js',
+        'public/mix',
+        'public/build',
+        'node_modules',
+        'vendor',
+        '.phpunit.cache',
+        '.php-cs-fixer.cache',
+        'coverage',
+        'coverage-html',
+        '.vapor',
+        '.serverless',
+        'storage/framework/cache',
+        'storage/framework/sessions',
+        'storage/framework/views',
+        'storage/framework/testing',
     }
     if exclude:
         exclude_dirs.update(exclude.split(','))
